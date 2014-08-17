@@ -1,0 +1,41 @@
+#!/bin/sh
+#============================================================================#
+# Mount hotplug devices as normal user                                       #
+#============================================================================#
+# (C) Denis Smirnov <mithraen@freesource.info>          http://mithraen.ru/  #
+#============================================================================#
+HMOUNT=/usr/bin/hmount
+PMOUNT=/usr/bin/pmount
+PUMOUNT=/usr/bin/pumount
+UDISKSCTL=/usr/bin/udisksctl
+
+if [ "$1" = "-u" ]; then
+    shift
+    exec umnt "$@"
+fi
+
+if [ "$1" = "-l" ] || [ -z "$1" ]; then
+    shift
+    exec lsmount "$@"
+fi
+
+if [ "$1" = "-h" ]; then
+    echo "Use: $0 <block device>"
+    exit -1
+fi
+
+DEV="$1"
+
+[ -b "$DEV" ] || [ -b "/dev/$DEV" ] && DEV="/dev/$DEV"
+
+echo "$DEV"
+
+if [ -x $HMOUNT ]; then
+    $HMOUNT "$DEV"
+elif [ -x $PMOUNT ]; then
+    $PMOUNT "$DEV"
+elif [ -x $UDISKSCTL ]; then
+    $UDISKSCTL mount -b "$DEV"
+else
+    /bin/mount "$DEV"
+fi

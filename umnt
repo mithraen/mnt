@@ -1,0 +1,35 @@
+#!/bin/sh
+#============================================================================#
+# Unmount hotplug devices as normal user                                     #
+#============================================================================#
+# (C) Denis Smirnov <mithraen@freesource.info>          http://mithraen.ru/  #
+#============================================================================#
+HMOUNT=/usr/bin/hmount
+PMOUNT=/usr/bin/pmount
+PUMOUNT=/usr/bin/pumount
+UDISKSCTL=/usr/bin/udisksctl
+
+if [ -z "$1" ]; then
+    echo "Use: $0 <block device>"
+    exit -1
+fi
+
+DEV="$1"
+
+[ -b "$DEV" ] || [ -b "/dev/$DEV" ] && DEV="/dev/$DEV"
+
+if [ -x $HMOUNT ]; then
+    $HMOUNT -u "$DEV"
+elif [ -x $PMOUNT ]; then
+    $PUMOUNT "$DEV"
+elif [ -x $UDISKSCTL ]; then
+    # TODO: add unmount by mount point
+    if [ -b "$DEV" ]; then
+        $UDISKSCTL mount -b "$DEV"
+    else
+        echo "$1 is not block device"
+        exit -1
+    fi
+else
+    /bin/umount "$DEV"
+fi
