@@ -25,7 +25,7 @@ elif [ -x $PMOUNT ]; then
 elif [ -x $UDISKSCTL ]; then
     # TODO: add unmount by mount point
     if [ -b "$DEV" ]; then
-        $UDISKSCTL mount -b "$DEV"
+        $UDISKSCTL unmount -b "$DEV"
     else
         echo "$1 is not block device"
         exit -1
