@@ -8,10 +8,22 @@ HMOUNT=/usr/bin/hmount
 PMOUNT=/usr/bin/pmount
 PUMOUNT=/usr/bin/pumount
 UDISKSCTL=/usr/bin/udisksctl
+FUSERMOUNT=/usr/bin/fusermount
 
 if [ -z "$1" ]; then
     echo "Use: $0 <block device>"
     exit -1
+fi
+
+# If it is fuse mount point -- unmount it with fusermount -u
+if [ -d "$1" ]; then
+    D=`realpath "$1"`
+    if cat /proc/mounts \
+            | sed 's/^[^ ]* //' \
+            | fgrep -q "$D fuse"; then
+        fusermount -u "$D"
+        exit $?
+    fi
 fi
 
 DEV="$1"
